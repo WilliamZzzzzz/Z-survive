@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>末日文字生存 · 家具 & 制造扩展版</title>
+  <style>
+    body {
+      background: #0b0f19;
+      color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .game {
+      max-width: 960px;
+      padding: 16px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 8px 0 4px;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+    .status {
+      background: #020617;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      border: 1px solid #1f2933;
+      margin-bottom: 10px;
+    }
+    .status span.label {
+      color: #9ca3af;
+      margin-right: 4px;
+    }
+    #log {
+      background: #020617;
+      border-radius: 6px;
+      padding: 10px;
+      min-height: 140px;
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.7;
+      border: 1px solid #1f2933;
+      margin-bottom: 10px;
+    }
+    .choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #111827;
+      color: #e5e7eb;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.05s, border-color 0.1s;
+    }
+    button:hover {
+      background: #1f2937;
+      border-color: #4b5563;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    .columns {
+      display: grid;
+      grid-template-columns: 2fr 1.4fr;
+      gap: 10px;
+    }
+    @media (max-width: 800px) {
+      .columns {
+        grid-template-columns: 1fr;
+      }
+    }
+    .panel {
+      background: #020617;
+      border-radius: 6px;
+      padding: 8px;
+      border: 1px solid #1f2933;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .panel h2 {
+      font-size: 14px;
+      margin: 0 0 4px;
+    }
+    .quality-gray { color: #9ca3af; }
+    .quality-white { color: #e5e7eb; }
+    .quality-green { color: #4ade80; }
+    .quality-blue { color: #38bdf8; }
+    .small {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    /* 背包网格 */
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+      margin: 4px 0;
+    }
+    .inventory-item {
+      border-radius: 6px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 4px;
+      min-height: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      text-align: center;
+      transition: background 0.1s, border-color 0.1s, transform 0.05s;
+    }
+    .inventory-item:hover {
+      background: #111827;
+      border-color: #4b5563;
+      transform: translateY(-1px);
+    }
+    .inventory-icon {
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
+    .inv-detail {
+      font-size: 11px;
+      color: #9ca3af;
+      min-height: 32px;
+      border-top: 1px solid #111827;
+      padding-top: 4px;
+      margin-top: 4px;
+    }
+
+    /* 家具网格 */
+    .furniture-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .furniture-item {
+      border-radius: 6px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 4px;
+      min-height: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 11px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s, transform 0.05s;
+    }
+    .furniture-item:hover {
+      background: #111827;
+      border-color: #4b5563;
+      transform: translateY(-1px);
+    }
+    .furniture-locked {
+      opacity: 0.5;
+      color: #6b7280;
+      border-color: #374151;
+      cursor: default;
+    }
+    .furniture-locked:hover {
+      background: #020617;
+      transform: none;
+    }
+
+    /* 制造分类网格 */
+    .craft-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .craft-item {
+      border-radius: 6px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 4px;
+      min-height: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 11px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s, transform 0.05s;
+    }
+    .craft-item:hover {
+      background: #111827;
+      border-color: #4b5563;
+      transform: translateY(-1px);
+    }
+    .craft-item-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .craft-item-desc {
+      color: #9ca3af;
+      font-size: 10px;
+    }
+
+    /* 地图界面 & 制造配方卡片共用 */
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .map-location {
+      border-radius: 6px;
+      border: 1px solid #1f2937;
+      padding: 6px;
+      background: #020617;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s, transform 0.05s;
+      font-size: 12px;
+    }
+    .map-location:hover {
+      background: #111827;
+      border-color: #4b5563;
+      transform: translateY(-1px);
+    }
+    .map-location-name {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 基地界面 -->
+<div class="game" id="homeScreen">
+  <h1>末日文字生存</h1>
+  <div class="subtitle">第一次总结扩展版 · 时间 + 状态（饥渴/体力）+ 武器品质 + 家具 + 制造 + 地图</div>
+
+  <div class="status" id="status"></div>
+  <div id="log"></div>
+
+  <div class="columns">
+    <div>
+      <div class="panel">
+        <h2>行动</h2>
+        <div class="choices" id="choices"></div>
+      </div>
+
+      <div class="panel" id="furniturePanel"></div>
+      <div class="panel" id="craftPanel"></div>
+    </div>
+
+    <div>
+      <div class="panel" id="weaponPanel"></div>
+      <div class="panel" id="inventoryPanel"></div>
+      <div class="panel" id="metaPanel"></div>
+    </div>
+  </div>
+
+  <div class="small">
+    提示：这是原型，不是最终效果。<br>
+    当前版本实现：时间系统、状态（饱腹/水分/体力）、基地界面、家具网格、制造分类界面、探索地图界面、探索/战斗、武器品质（灰/白/绿/蓝）、耐久、制造配方、背包网格。
+  </div>
+</div>
+
+<!-- 探索地图界面 -->
+<div class="game" id="mapScreen" style="display:none;">
+  <h1>探索地图</h1>
+  <div class="subtitle">选择一个地点前往探索。距离越远耗时越长，晚上 21:00 之后危险度会提升。</div>
+
+  <div class="status" id="mapStatus"></div>
+
+  <div class="panel">
+    <h2>区域选择</h2>
+    <div class="map-grid">
+      <div class="map-location" onclick="selectLocation('residential')">
+        <div class="map-location-name">🏠 附近住宅区</div>
+        <div>距离：近（40 分钟）</div>
+        <div>资源：基础食物 / 材料</div>
+      </div>
+      <div class="map-location" onclick="selectLocation('supermarket')">
+        <div class="map-location-name">🏪 废弃超市</div>
+        <div>距离：中（60 分钟）</div>
+        <div>资源：食物 / 水</div>
+      </div>
+      <div class="map-location" onclick="selectLocation('hospital')">
+        <div class="map-location-name">🏥 废弃医院</div>
+        <div>距离：中远（75 分钟）</div>
+        <div>资源：医疗物资</div>
+      </div>
+      <div class="map-location" onclick="selectLocation('factory')">
+        <div class="map-location-name">🏭 工业区</div>
+        <div>距离：远（90 分钟）</div>
+        <div>资源：金属 / 材料</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>地点信息</h2>
+    <div id="mapLocationDetail" style="min-height:60px; font-size:13px; white-space:pre-wrap;">
+      点击左侧任意地点查看详情。
+    </div>
+    <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button onclick="startTravel()">🚶 出发前往</button>
+      <button onclick="backToBase()">⬅️ 返回基地</button>
+    </div>
+  </div>
+</div>
+
+<!-- 制造分类子界面 -->
+<div class="game" id="craftScreen" style="display:none;">
+  <h1 id="craftTitle">制造</h1>
+  <div class="subtitle" id="craftSubtitle">选择一个配方进行制作。</div>
+
+  <div class="status" id="craftStatus"></div>
+
+  <div class="panel">
+    <h2 id="craftCategoryName">配方</h2>
+    <div id="craftList"></div>
+  </div>
+
+  <div class="panel">
+    <h2>说明 / 结果</h2>
+    <div id="craftDetail" style="min-height:60px; font-size:13px; white-space:pre-wrap;">
+      选择一个配方查看详细信息并进行制作。
+    </div>
+    <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button onclick="backFromCraft()">⬅️ 返回基地</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // -----------------------
+  // 品质定义
+  // -----------------------
+  const Qualities = {
+    gray:   { name: '灰色',  colorClass: 'quality-gray',  atkBonus: 0,  durBonus: 0 },
+    white:  { name: '白色',  colorClass: 'quality-white', atkBonus: 1,  durBonus: 4 },
+    green:  { name: '绿色',  colorClass: 'quality-green', atkBonus: 2,  durBonus: 8 },
+    blue:   { name: '蓝色',  colorClass: 'quality-blue',  atkBonus: 3,  durBonus: 12 }
+  };
+
+  function rollDropQuality() {
+    const r = Math.random();
+    if (r < 0.4) return 'gray';
+    if (r < 0.75) return 'white';
+    if (r < 0.95) return 'green';
+    return 'blue';
+  }
+
+  function rollCraftQuality() {
+    const r = Math.random();
+    if (r < 0.6) return '白色'; // 已废弃，只保留接口兼容
+  }
+
+  // -----------------------
+  // 地图地点定义
+  // -----------------------
+  const MapLocations = {
+    residential: {
+      key: 'residential',
+      name: '附近住宅区',
+      minutes: 40,
+      baseDanger: '低',
+      lootHint: '基础食物 / 材料'
+    },
+    supermarket: {
+      key: 'supermarket',
+      name: '废弃超市',
+      minutes: 60,
+      baseDanger: '中',
+      lootHint: '大量食物 / 水'
+    },
+    hospital: {
+      key: 'hospital',
+      name: '废弃医院',
+      minutes: 75,
+      baseDanger: '中',
+      lootHint: '医疗物资'
+    },
+    factory: {
+      key: 'factory',
+      name: '工业区',
+      minutes: 90,
+      baseDanger: '高',
+      lootHint: '金属 / 材料'
+    }
+  };
+
+  // -----------------------
+  // 家具定义
+  // -----------------------
+  const FurnitureDefs = [
+    { key: 'bed',        name: '床',       desc: '可以睡觉恢复体力。' },
+    { key: 'workbench',  name: '工具台',   desc: '用于加工武器和材料。' },
+    { key: 'stove',      name: '灶台',     desc: '可以烹饪更好的食物。' },
+    { key: 'medkit',     name: '医疗箱',   desc: '简单处理伤口和疾病。' },
+    { key: 'barrel',     name: '酿酒桶',   desc: '用于酿造酒精，提升士气。' },
+    { key: 'fireplace',  name: '壁炉',     desc: '提供取暖和少量烹饪功能。' },
+    { key: 'greenhouse', name: '小型温室', desc: '持续产出少量食材与药草。' }
+  ];
+
+  // -----------------------
+  // 制造分类 & 配方定义
+  // -----------------------
+  const CraftCategories = {
+    cooking: {
+      key: 'cooking',
+      name: '烹饪',
+      short: '提升饱腹与少量 HP。',
+      desc: '使用基础食物做成更易保存、更高饱腹的料理。',
+      recipes: [
+        {
+          id: 'cook_meal',
+          name: '简易热食',
+          time: 60,
+          cost: { food: 1, water: 0, materials: 0 },
+          effect: { hunger: 25, hp: 5, morale: 2 },
+          desc: '把手头的食材加热，做成一份热乎的简易餐。恢复饱腹与少量 HP。'
+        },
+        {
+          id: 'boil_water',
+          name: '煮沸水',
+          time: 45,
+          cost: { food: 0, water: 1, materials: 0 },
+          effect: { thirst: 15, morale: 1 },
+          desc: '把可疑的水源煮沸，至少口渴的时候不用太担心会闹肚子。'
+        }
+      ]
+    },
+    medical: {
+      key: 'medical',
+      name: '制药',
+      short: '治疗伤势，提升生存率。',
+      desc: '制作绷带与简单药物，减少伤势带来的风险。',
+      recipes: [
+        {
+          id: 'bandage',
+          name: '简易绷带',
+          time: 45,
+          cost: { food: 0, water: 0, materials: 1 },
+          effect: { hp: 10, morale: 1 },
+          desc: '用干净布料和少量药物做成简单绷带，缓慢恢复 HP。'
+        },
+        {
+          id: 'med_pack',
+          name: '小型医疗包',
+          time: 90,
+          cost: { food: 0, water: 0, materials: 2 },
+          effect: { hp: 25, morale: 2 },
+          desc: '将止血剂、绷带与止痛药打包成一个小医疗包，应对更严重的伤势。'
+        }
+      ]
+    },
+    processing: {
+      key: 'processing',
+      name: '加工',
+      short: '把原材料加工为更实用的物品。',
+      desc: '通过工具台把木材和金属加工成简易武器和构件。',
+      recipes: [
+        {
+          id: 'wood_stick',
+          name: '制作木棍',
+          time: 60,
+          cost: { food: 0, water: 0, materials: 2 },
+          effect: { },
+          type: 'weapon',
+          weaponBase: '木棍',
+          weaponAtk: 3,
+          weaponDur: 8,
+          desc: '用木板和金属碎片做出一根结实的木棍，品质按几率随机（白/绿/蓝）。'
+        },
+        {
+          id: 'wood_plank',
+          name: '木板强化件',
+          time: 45,
+          cost: { food: 0, water: 0, materials: 1 },
+          effect: { materials: 1, morale: 1 },
+          desc: '把散乱的木料加工成规则木板，便于后续建造和加固。'
+        }
+      ]
+    },
+    brewing: {
+      key: 'brewing',
+      name: '酿酒',
+      short: '提升士气，也可能有副作用。',
+      desc: '在酿酒桶里发酵一些东西，做出能让人暂时忘记痛苦的东西。',
+      recipes: [
+        {
+          id: 'light_brew',
+          name: '淡酒',
+          time: 90,
+          cost: { food: 1, water: 1, materials: 0 },
+          effect: { morale: 10, thirst: -5 },
+          desc: '发酵出来的淡酒，能明显提升士气，但会稍微加重口渴。'
+        }
+      ]
+    },
+    farming: {
+      key: 'farming',
+      name: '种植',
+      short: '为基地提供长期补给。',
+      desc: '在小型温室里尝试种植一些东西，虽然粗糙，但总比坐以待毙好。',
+      recipes: [
+        {
+          id: 'plant_veggies',
+          name: '种植蔬菜',
+          time: 60,
+          cost: { food: 0, water: 1, materials: 1 },
+          effect: { food: 2, morale: 2 },
+          desc: '简单的土培蔬菜，先投入一点资源，稍后能收获可观的食物（原型中立即结算）。'
+        }
+      ]
+    }
+  };
+
+  // -----------------------
+  // 游戏状态
+  // -----------------------
+  const GameState = {
+    uiMode: 'home',
+
+    day: 1,
+    hour: 7,
+    minute: 0,
+
+    hp: 100,
+    maxHp: 100,
+
+    hunger: 80,
+    thirst: 80,
+    fatigue: 80,
+
+    food: 5,
+    water: 5,
+    materials: 6,
+    ammo: 5,
+    morale: 50,
+
+    alive: true,
+    logExtra: '',
+
+    weaponInventory: [],
+    equippedWeaponIndex: -1,
+
+    lastHungerMsgLevel: null,
+    lastThirstMsgLevel: null,
+    lastFatigueMsgLevel: null,
+
+    selectedLocationKey: null,
+    craftCategoryKey: null,
+
+    furniture: {}
+  };
+
+  // -----------------------
+  // DOM 工具
+  // -----------------------
+  function q(id) { return document.getElementById(id); }
+
+  function formatTime() {
+    const hh = String(GameState.hour).padStart(2, '0');
+    const mm = String(GameState.minute).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
+  function updateStatus() {
+    const s = `
+      <span class="label">天数</span>${GameState.day}
+      &emsp;<span class="label">时间</span>${formatTime()}
+      &emsp;<span class="label">HP</span>${GameState.hp}/${GameState.maxHp}
+      &emsp;<span class="label">饱腹</span>${Math.round(GameState.hunger)}
+      &emsp;<span class="label">水分</span>${Math.round(GameState.thirst)}
+      &emsp;<span class="label">体力</span>${Math.round(GameState.fatigue)}
+      <br>
+      <span class="label">食物</span>${GameState.food}
+      &emsp;<span class="label">水</span>${GameState.water}
+      &emsp;<span class="label">材料</span>${GameState.materials}
+      &emsp;<span class="label">弹药</span>${GameState.ammo}
+      &emsp;<span class="label">士气</span>${GameState.morale}
+    `;
+    q('status').innerHTML = s;
+  }
+
+  function updateMapStatus() {
+    const nightWarning = GameState.hour >= 21
+      ? '夜深了，丧尸们开始躁动，外出风险提升。'
+      : '白天/傍晚，外出相对安全。';
+
+    const text = `
+      <span class="label">天数</span>${GameState.day}
+      &emsp;<span class="label">时间</span>${formatTime()}
+      &emsp;<span class="label">HP</span>${GameState.hp}/${GameState.maxHp}
+      <br>
+      <span class="label">饱腹</span>${Math.round(GameState.hunger)}
+      &emsp;<span class="label">水分</span>${Math.round(GameState.thirst)}
+      &emsp;<span class="label">体力</span>${Math.round(GameState.fatigue)}
+      <br>${nightWarning}
+    `;
+    q('mapStatus').innerHTML = text;
+  }
+
+  function updateCraftStatus() {
+    const text = `
+      <span class="label">天数</span>${GameState.day}
+      &emsp;<span class="label">时间</span>${formatTime()}
+      &emsp;<span class="label">HP</span>${GameState.hp}/${GameState.maxHp}
+      <br>
+      <span class="label">饱腹</span>${Math.round(GameState.hunger)}
+      &emsp;<span class="label">水分</span>${Math.round(GameState.thirst)}
+      &emsp;<span class="label">体力</span>${Math.round(GameState.fatigue)}
+      &emsp;<span class="label">士气</span>${Math.round(GameState.morale)}
+    `;
+    q('craftStatus').innerHTML = text;
+  }
+
+  function setLog(text) {
+    q('log').textContent = text;
+  }
+
+  function pushLog(text) {
+    q('log').textContent += '\n\n' + text;
+  }
+
+  function setChoices(buttons) {
+    const box = q('choices');
+    box.innerHTML = '';
+    buttons.forEach(cfg => {
+      const btn = document.createElement('button');
+      btn.textContent = cfg.text;
+      btn.onclick = cfg.onClick;
+      box.appendChild(btn);
+    });
+  }
+
+  // -----------------------
+  // 武器相关
+  // -----------------------
+  function createWeapon(baseName, baseAtk, baseDur, qualityKey, type) {
+    const qInfo = Qualities[qualityKey];
+    return {
+      name: baseName,
+      type,
+      qualityKey,
+      atk: baseAtk + qInfo.atkBonus,
+      maxDur: baseDur + qInfo.durBonus,
+      dur: baseDur + qInfo.durBonus
+    };
+  }
+
+  function addWeaponToInventory(weapon) {
+    GameState.weaponInventory.push(weapon);
+    if (GameState.equippedWeaponIndex === -1) {
+      GameState.equippedWeaponIndex = 0;
+    }
+    updateWeaponPanel();
+    updateInventoryPanel();
+  }
+
+  function describeWeapon(w) {
+    const qInfo = Qualities[w.qualityKey];
+    return `[${qInfo.name}] ${w.name} (ATK ${w.atk}, 耐久 ${w.dur}/${w.maxDur})`;
+  }
+
+  function updateWeaponPanel() {
+    const panel = q('weaponPanel');
+    let html = '<h2>武器 & 装备</h2>';
+
+    if (GameState.weaponInventory.length === 0) {
+      html += '<div>你现在没有任何武器，只能徒手战斗（ATK 1）。</div>';
+    } else {
+      html += '<div><strong>当前武器：</strong><br>';
+      const idx = GameState.equippedWeaponIndex;
+      const w = GameState.weaponInventory[idx];
+      const qInfo = Qualities[w.qualityKey];
+      html += `<span class="${qInfo.colorClass}">${describeWeapon(w)}</span></div>`;
+      html += '<div style="margin-top:4px;"><strong>背包武器：</strong></div>';
+      html += '<ul style="padding-left:18px;margin:4px 0;">';
+      GameState.weaponInventory.forEach((wep, i) => {
+        const info = Qualities[wep.qualityKey];
+        const marker = (i === idx) ? '★ ' : '';
+        html += `<li class="${info.colorClass}" style="cursor:pointer;" onclick="equipWeapon(${i})">${marker}${describeWeapon(wep)}</li>`;
+      });
+      html += '</ul>';
+    }
+
+    panel.innerHTML = html;
+  }
+
+  window.equipWeapon = function (index) {
+    if (index >= 0 && index < GameState.weaponInventory.length) {
+      GameState.equippedWeaponIndex = index;
+      pushLog(`你装备了 ${describeWeapon(GameState.weaponInventory[index])}`);
+      updateWeaponPanel();
+      updateInventoryPanel();
+    }
+  };
+
+  function getCurrentAtk() {
+    const idx = GameState.equippedWeaponIndex;
+    if (idx === -1) return 1;
+    const w = GameState.weaponInventory[idx];
+    return w.atk;
+  }
+
+  function damageWeapon() {
+    const idx = GameState.equippedWeaponIndex;
+    if (idx === -1) return;
+    const w = GameState.weaponInventory[idx];
+    w.dur -= 1;
+    if (w.dur <= 0) {
+      pushLog(`${w.name} 已经损坏，无法继续使用。`);
+      GameState.weaponInventory.splice(idx, 1);
+      if (GameState.weaponInventory.length === 0) {
+        GameState.equippedWeaponIndex = -1;
+      } else {
+        GameState.equippedWeaponIndex = 0;
+      }
+    }
+    updateWeaponPanel();
+    updateInventoryPanel();
+  }
+
+  // -----------------------
+  // 背包网格
+  // -----------------------
+  const InventoryInfo = {
+    food:   { icon: '🍞', name: '食物', desc: '可以恢复饱腹度，并稍微回复 HP。' },
+    water:  { icon: '💧', name: '水', desc: '可以恢复水分，让你保持清醒。' },
+    mat:    { icon: '🪵', name: '材料', desc: '木材和废金属，用于制作武器与修理。' },
+    ammo:   { icon: '💥', name: '弹药', desc: '用于远程武器，目前仅用于占位。' },
+    weapon: { icon: '⚔️', name: '武器摘要', desc: '显示你当前拥有的武器概况。' }
+  };
+
+  function showInventoryDetail(key) {
+    const info = InventoryInfo[key];
+    if (!info) return;
+    let extra = '';
+    if (key === 'weapon') {
+      if (GameState.weaponInventory.length === 0) {
+        extra = '你还没有任何武器。';
+      } else {
+        extra = '你拥有的武器：\n' + GameState.weaponInventory.map(describeWeapon).join('\n');
+      }
+    }
+    q('inventoryDetailText').textContent = info.desc + (extra ? '\n' + extra : '');
+  }
+
+  function updateInventoryPanel() {
+    const panel = q('inventoryPanel');
+    let html = '<h2>背包</h2>';
+    html += '<div class="inventory-grid">';
+
+    const items = [];
+
+    if (GameState.food > 0) {
+      items.push({ key: 'food', count: GameState.food });
+    }
+    if (GameState.water > 0) {
+      items.push({ key: 'water', count: GameState.water });
+    }
+    if (GameState.materials > 0) {
+      items.push({ key: 'mat', count: GameState.materials });
+    }
+    if (GameState.ammo > 0) {
+      items.push({ key: 'ammo', count: GameState.ammo });
+    }
+    items.push({ key: 'weapon', count: GameState.weaponInventory.length });
+
+    if (items.length === 0) {
+      html += '<div class="inventory-item">背包是空的。</div>';
+    } else {
+      items.forEach(item => {
+        const info = InventoryInfo[item.key];
+        html += `
+          <div class="inventory-item" onclick="showInventoryDetail('${item.key}')">
+            <div class="inventory-icon">${info.icon}</div>
+            <div>${info.name}</div>
+            <div>x${item.count}</div>
+          </div>
+        `;
+      });
+    }
+
+    html += '</div><div id="inventoryDetailText" class="inv-detail">点击物品查看说明。</div>';
+    panel.innerHTML = html;
+  }
+
+  window.showInventoryDetail = showInventoryDetail;
+
+  // -----------------------
+  // 家具 & 制造面板
+  // -----------------------
+  function updateFurniturePanel() {
+    const panel = q('furniturePanel');
+    let html = '<h2>家具</h2>';
+    html += '<div class="furniture-grid">';
+    FurnitureDefs.forEach(f => {
+      const unlocked = !!GameState.furniture[f.key];
+      const locked = !unlocked && f.key !== 'bed';
+      const classes = 'furniture-item' + (locked ? ' furniture-locked' : '');
+      const label = locked ? `${f.name}（未制造）` : f.name;
+      html += `
+        <div class="${classes}" onclick="clickFurniture('${f.key}')">
+          <div>${label}</div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    panel.innerHTML = html;
+  }
+
+  window.clickFurniture = function (key) {
+    const unlocked = !!GameState.furniture[key];
+    const def = FurnitureDefs.find(f => f.key === key);
+    if (!def) return;
+    if (!unlocked && key !== 'bed') {
+      pushLog(`你看着 ${def.name} 应该在的位置——也许哪天能把它造出来。`);
+    } else if (key === 'bed') {
+      pushLog('你躺在床上稍微放空了一会儿，虽然没真正睡着，但心情好了点。');
+      GameState.morale = Math.min(100, GameState.morale + 2);
+    } else {
+      pushLog(`你检查了一下 ${def.name}，暂时还没有特别要做的事情。`);
+    }
+    updateStatus();
+  };
+
+  function updateCraftPanel() {
+    const panel = q('craftPanel');
+    let html = '<h2>制造</h2>';
+    html += '<div class="craft-grid">';
+    Object.values(CraftCategories).forEach(cat => {
+      html += `
+        <div class="craft-item" onclick="openCraftCategory('${cat.key}')">
+          <div class="craft-item-title">${cat.name}</div>
+          <div class="craft-item-desc">${cat.short || ''}</div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    panel.innerHTML = html;
+  }
+
+  // -----------------------
+  // 时间 & 状态 消耗
+  // -----------------------
+  function advanceTime(minutes) {
+    if (minutes <= 0) return;
+    const hours = minutes / 60;
+
+    let totalMinutes = GameState.day * 24 * 60 + GameState.hour * 60 + GameState.minute + minutes;
+    GameState.day = Math.floor(totalMinutes / (24 * 60));
+    totalMinutes = totalMinutes % (24 * 60);
+    GameState.hour = Math.floor(totalMinutes / 60);
+    GameState.minute = totalMinutes % 60;
+
+    GameState.hunger -= 3 * hours;
+    GameState.thirst -= 4 * hours;
+
+    GameState.hunger = Math.max(0, Math.min(100, GameState.hunger));
+    GameState.thirst = Math.max(0, Math.min(100, GameState.thirst));
+
+    checkVitalMessages();
+  }
+
+  function changeFatigue(delta) {
+    GameState.fatigue += delta;
+    GameState.fatigue = Math.max(0, Math.min(100, GameState.fatigue));
+    checkVitalMessages();
+  }
+
+  function checkVitalMessages() {
+    const h = GameState.hunger;
+    let levelH = 0;
+    if (h <= 30) levelH = 3;
+    else if (h <= 50) levelH = 2;
+    else if (h >= 100) levelH = 4;
+    else if (h > 50) levelH = 1;
+
+    if (levelH !== GameState.lastHungerMsgLevel) {
+      if (levelH === 4) {
+        pushLog('你打了个饱嗝，觉得很满足。');
+      } else if (levelH === 2) {
+        pushLog('你的胃开始抗议，也许该吃点东西了。');
+      } else if (levelH === 3) {
+        pushLog('你已经饿得头昏眼花，再不吃点东西就撑不住了。');
+      }
+      GameState.lastHungerMsgLevel = levelH;
+    }
+
+    const t = GameState.thirst;
+    let levelT = 0;
+    if (t <= 30) levelT = 3;
+    else if (t <= 50) levelT = 2;
+    else if (t >= 100) levelT = 4;
+    else if (t > 50) levelT = 1;
+
+    if (levelT !== GameState.lastThirstMsgLevel) {
+      if (levelT === 4) {
+        pushLog('你抹了抹嘴角的水渍，感觉浑身舒畅。');
+      } else if (levelT === 2) {
+        pushLog('喉咙有点发干，也许该喝点水了。');
+      } else if (levelT === 3) {
+        pushLog('你的喉咙像被砂纸擦过，再不喝水就要脱水了。');
+      }
+      GameState.lastThirstMsgLevel = levelT;
+    }
+
+    const f = GameState.fatigue;
+    let levelF = 0;
+    if (f <= 30) levelF = 3;
+    else if (f <= 50) levelF = 2;
+    else if (f >= 100) levelF = 4;
+    else if (f > 50) levelF = 1;
+
+    if (levelF !== GameState.lastFatigueMsgLevel) {
+      if (levelF === 4) {
+        pushLog('你活动了一下手脚，精神不错。');
+      } else if (levelF === 2) {
+        pushLog('你开始感觉有点累了，也许该休息一下。');
+      } else if (levelF === 3) {
+        pushLog('你的身体像被灌了铅，再不睡一觉就顶不住了。');
+      }
+      GameState.lastFatigueMsgLevel = levelF;
+    }
+  }
+
+  function applyStarvationDamage() {
+    let dmg = 0;
+    if (GameState.hunger <= 0) dmg += 4;
+    else if (GameState.hunger <= 20) dmg += 2;
+
+    if (GameState.thirst <= 0) dmg += 6;
+    else if (GameState.thirst <= 20) dmg += 3;
+
+    if (GameState.fatigue <= 0) dmg += 4;
+    else if (GameState.fatigue <= 20) dmg += 2;
+
+    if (dmg > 0) {
+      GameState.hp -= dmg;
+      pushLog(`由于极度的饥饿、口渴或疲劳，你额外失去了 ${dmg} 点 HP。`);
+    }
+  }
+
+  // -----------------------
+  // 游戏流程：基地界面
+  // -----------------------
+  function enterBase(first = false) {
+    GameState.uiMode = 'home';
+    q('homeScreen').style.display = 'block';
+    q('mapScreen').style.display = 'none';
+    q('craftScreen').style.display = 'none';
+
+    updateStatus();
+    updateWeaponPanel();
+    updateInventoryPanel();
+    updateFurniturePanel();
+    updateCraftPanel();
+
+    let text = '';
+    if (first) {
+      text += '世界已经崩溃。你在一间勉强能挡风遮雨的避难所里醒来，外面偶尔传来零星的嚎叫声。\n';
+      text += '现在是 Day 1 · 07:00，你需要食物、水，还有一件像样的武器，才能在这个世界活下去。';
+    } else {
+      text += '你回到避难所，关上门，喘了口气。至少这里暂时还算安全。';
+    }
+    if (GameState.logExtra) {
+      text += '\n\n' + GameState.logExtra;
+      GameState.logExtra = '';
+    }
+    setLog(text);
+
+    setChoices([
+      { text: '🗺 出门前往地图', onClick: openMap },
+      { text: '⚔️ 去附近清理丧尸（1 小时）', onClick: fightZombie },
+      { text: '🍞 吃点东西', onClick: eatFood },
+      { text: '💧 喝水', onClick: drinkWater },
+      { text: '🛏 睡觉 8 小时', onClick: sleepEightHours }
+    ]);
+  }
+
+  function fightZombie() {
+    advanceTime(60);
+    changeFatigue(-10);
+
+    let text = '你在破败的街道上遇到了一只丧尸。\n';
+    const enemyHpMax = 12 + Math.floor(Math.random() * 8);
+    let enemyHp = enemyHpMax;
+
+    const atk = getCurrentAtk();
+    const enemyAtk = 4 + Math.floor(Math.random() * 3);
+
+    enemyHp -= atk;
+    damageWeapon();
+    text += `你先出手，对丧尸造成了 ${atk} 点伤害。\n`;
+
+    if (enemyHp <= 0) {
+      GameState.morale += 3;
+      text += '丧尸倒在地上，不再动弹。\n';
+      const r = Math.random();
+      if (r < 0.4) {
+        GameState.food += 1;
+        text += '你从附近翻出了一点食物。';
+      } else if (r < 0.7) {
+        const qk = rollDropQuality();
+        const w = createWeapon('简易铁棒', 4, 10, qk, 'melee');
+        addWeaponToInventory(w);
+        text += `你从尸体附近找到了一根铁棒：${describeWeapon(w)}`;
+      } else {
+        text += '这次没什么战利品。';
+      }
+      checkStateAndReturn(text);
+      return;
+    }
+
+    GameState.hp -= enemyAtk;
+    text += `丧尸向你扑来，你受到了 ${enemyAtk} 点伤害。`;
+
+    if (GameState.hp <= 0) {
+      GameState.hp = 0;
+      enterGameOver(text + '\n\n你倒在地上，再也爬不起来。');
+      return;
+    }
+
+    checkStateAndReturn(text);
+  }
+
+  function eatFood() {
+    if (GameState.food <= 0) {
+      checkStateAndReturn('你翻遍了角落，也没找到多余的食物。');
+      return;
+    }
+    GameState.food -= 1;
+    GameState.hunger = Math.min(100, GameState.hunger + 30);
+    GameState.hp = Math.min(GameState.maxHp, GameState.hp + 5);
+    GameState.morale += 2;
+    checkVitalMessages();
+    checkStateAndReturn('你吃掉了一份食物，感觉胃里暖和了一些。');
+  }
+
+  function drinkWater() {
+    if (GameState.water <= 0) {
+      checkStateAndReturn('水壶是空的，你只能舔舔干裂的嘴唇。');
+      return;
+    }
+    GameState.water -= 1;
+    GameState.thirst = Math.min(100, GameState.thirst + 30);
+    GameState.morale += 1;
+    checkVitalMessages();
+    checkStateAndReturn('你小口地喝了点水，让脑子清醒了一些。');
+  }
+
+  function sleepEightHours() {
+    advanceTime(480);
+    changeFatigue(+40);
+    GameState.morale += 5;
+    checkStateAndReturn('你找了个相对安全的角落，睡了大约八个小时。醒来时，脑子清醒了一些，但肚子更饿了。');
+  }
+
+  function checkStateAndReturn(extraText) {
+    applyStarvationDamage();
+
+    if (GameState.hp <= 0) {
+      GameState.hp = 0;
+      enterGameOver(extraText + '\n\n你再也撑不下去了。');
+      return;
+    }
+    GameState.logExtra = extraText;
+    enterBase(false);
+  }
+
+  function enterGameOver(text) {
+    GameState.alive = false;
+    updateStatus();
+    setLog(text + '\n\n—— 游戏结束 ——');
+    setChoices([
+      { text: '重新开始', onClick: () => restart() }
+    ]);
+  }
+
+  function restart() {
+    GameState.uiMode = 'home';
+    GameState.day = 1;
+    GameState.hour = 7;
+    GameState.minute = 0;
+
+    GameState.hp = 100;
+    GameState.maxHp = 100;
+
+    GameState.hunger = 80;
+    GameState.thirst = 80;
+    GameState.fatigue = 80;
+
+    GameState.food = 5;
+    GameState.water = 5;
+    GameState.materials = 6;
+    GameState.ammo = 5;
+    GameState.morale = 50;
+
+    GameState.alive = true;
+    GameState.weaponInventory = [];
+    GameState.equippedWeaponIndex = -1;
+    GameState.logExtra = '';
+
+    GameState.lastHungerMsgLevel = null;
+    GameState.lastThirstMsgLevel = null;
+    GameState.lastFatigueMsgLevel = null;
+
+    GameState.selectedLocationKey = null;
+    GameState.craftCategoryKey = null;
+
+    GameState.furniture = {
+      bed: true,
+      workbench: false,
+      stove: false,
+      medkit: false,
+      barrel: false,
+      fireplace: false,
+      greenhouse: false
+    };
+
+    q('metaPanel').innerHTML =
+      '<h2>本局信息</h2><div>后续这里可以接入“死亡循环 / 永久增益 / 成就解锁”等系统。</div>';
+    enterBase(true);
+  }
+
+  // -----------------------
+  // 地图界面逻辑
+  // -----------------------
+  function openMap() {
+    GameState.uiMode = 'map';
+    q('homeScreen').style.display = 'none';
+    q('mapScreen').style.display = 'block';
+    q('craftScreen').style.display = 'none';
+
+    updateMapStatus();
+    q('mapLocationDetail').textContent = '点击左侧任意地点查看详情。';
+    GameState.selectedLocationKey = null;
+  }
+
+  function backToBase() {
+    enterBase(false);
+  }
+
+  function dangerWithNight(baseDanger) {
+    if (GameState.hour >= 21) {
+      if (baseDanger === '低') return '中（夜晚加成）';
+      if (baseDanger === '中') return '高（夜晚加成）';
+      return '极高（夜晚加成）';
+    }
+    return baseDanger;
+  }
+
+  function selectLocation(key) {
+    const loc = MapLocations[key];
+    GameState.selectedLocationKey = key;
+    const danger = dangerWithNight(loc.baseDanger);
+    const text =
+      `【${loc.name}】\n` +
+      `预计往返耗时：约 ${loc.minutes} 分钟\n` +
+      `危险程度：${danger}\n` +
+      `主要资源：${loc.lootHint}\n\n` +
+      `点击“出发前往”开始这次行动。`;
+    q('mapLocationDetail').textContent = text;
+  }
+
+  function startTravel() {
+    if (!GameState.selectedLocationKey) {
+      q('mapLocationDetail').textContent = '请先在左侧选择一个地点。';
+      return;
+    }
+    const loc = MapLocations[GameState.selectedLocationKey];
+    const beforeNight = GameState.hour >= 21;
+    const minutes = loc.minutes;
+    advanceTime(minutes);
+    changeFatigue(-minutes / 6);
+
+    let log = `你离开避难所，前往【${loc.name}】。\n`;
+    const atNight = GameState.hour >= 21 || beforeNight;
+    const r = Math.random();
+
+    const enemyBonus = atNight ? 0.15 : 0;
+    if (r < 0.25) {
+      GameState.food += 1;
+      GameState.water += (loc.key === 'supermarket') ? 1 : 0;
+      log += '你在废弃的角落里翻出了些还能吃喝的东西。';
+    } else if (r < 0.5) {
+      const addMat = loc.key === 'factory' ? 3 : 2;
+      GameState.materials += addMat;
+      log += '你在破损的设施中拆下了一些材料。';
+    } else if (r < 0.7 + enemyBonus) {
+      log += resolveMapZombieEncounter(loc, atNight);
+    } else {
+      log += '你小心翼翼地搜索了一圈，但这次似乎并没有太多收获。';
+    }
+
+    q('homeScreen').style.display = 'block';
+    q('mapScreen').style.display = 'none';
+    checkStateAndReturn(log);
+  }
+
+  function resolveMapZombieEncounter(loc, atNight) {
+    let text = '';
+    const atk = getCurrentAtk();
+    let enemyHp = 10 + Math.floor(Math.random() * 6);
+    if (atNight) enemyHp += 4;
+
+    const enemyAtk = atNight ? 6 : 4;
+    text += `在 ${loc.name} 附近，你被一只丧尸堵在了阴暗的角落。\n`;
+
+    enemyHp -= atk;
+    damageWeapon();
+    text += `你先出手，对丧尸造成了 ${atk} 点伤害。\n`;
+
+    if (enemyHp <= 0) {
+      GameState.morale += 2;
+      text += '丧尸被你击倒，不再动弹。\n';
+      if (Math.random() < 0.4) {
+        const qk = rollDropQuality();
+        const w = createWeapon('损坏的武器', 3, 6, qk, 'melee');
+        addWeaponToInventory(w);
+        text += `你从附近捡起了一件还能用的武器：${describeWeapon(w)}\n`;
+      }
+      return text;
+    }
+
+    GameState.hp -= enemyAtk;
+    text += `丧尸凶狠地反扑，你受到了 ${enemyAtk} 点伤害。\n`;
+    if (GameState.hp <= 0) {
+      GameState.hp = 0;
+      enterGameOver(text + '\n\n你倒在地上，再也爬不起来。');
+      return '';
+    }
+    return text;
+  }
+
+  window.selectLocation = selectLocation;
+  window.startTravel = startTravel;
+  window.backToBase = backToBase;
+
+  // -----------------------
+  // 制造界面逻辑
+  // -----------------------
+  function openCraftCategory(key) {
+    const cat = CraftCategories[key];
+    if (!cat) return;
+    GameState.craftCategoryKey = key;
+    GameState.uiMode = 'craft';
+
+    q('homeScreen').style.display = 'none';
+    q('mapScreen').style.display = 'none';
+    q('craftScreen').style.display = 'block';
+
+    renderCraftScreen();
+  }
+  window.openCraftCategory = openCraftCategory;
+
+  function renderCraftScreen() {
+    const cat = CraftCategories[GameState.craftCategoryKey];
+    if (!cat) return;
+    updateCraftStatus();
+    q('craftTitle').textContent = `制造 - ${cat.name}`;
+    q('craftSubtitle').textContent = cat.desc || '';
+    q('craftCategoryName').textContent = `${cat.name} 配方`;
+
+    let html = '<div class="map-grid">';
+    cat.recipes.forEach(r => {
+      const cost = r.cost || {};
+      html += `
+        <div class="map-location">
+          <div class="map-location-name">${r.name}</div>
+          <div style="font-size:12px;">耗时：約 ${r.time || 30} 分钟</div>
+          <div style="font-size:12px;">消耗：食物 ${cost.food || 0} / 水 ${cost.water || 0} / 材料 ${cost.materials || 0}</div>
+          <div style="font-size:12px; margin-top:4px;">${r.desc}</div>
+          <div style="margin-top:6px;">
+            <button onclick="craftRecipe('${r.id}')">制作</button>
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    q('craftList').innerHTML = html;
+    q('craftDetail').textContent = '选择一个配方进行制作，结果会在这里显示。';
+  }
+
+  function craftRecipe(id) {
+    const cat = CraftCategories[GameState.craftCategoryKey];
+    if (!cat) return;
+    const recipe = cat.recipes.find(r => r.id === id);
+    if (!recipe) return;
+
+    const cost = recipe.cost || {};
+    if (GameState.food < (cost.food || 0) ||
+        GameState.water < (cost.water || 0) ||
+        GameState.materials < (cost.materials || 0)) {
+      q('craftDetail').textContent = '材料不足，无法制作这项配方。';
+      return;
+    }
+
+    GameState.food      -= (cost.food || 0);
+    GameState.water     -= (cost.water || 0);
+    GameState.materials -= (cost.materials || 0);
+
+    advanceTime(recipe.time || 30);
+    changeFatigue(-(recipe.time || 30) / 10);
+
+    let text = `你开始进行【${recipe.name}】。\n${recipe.desc}\n`;
+
+    const eff = recipe.effect || {};
+    if (eff.hunger) {
+      GameState.hunger = Math.min(100, GameState.hunger + eff.hunger);
+      text += `饱腹 +${eff.hunger}。\n`;
+    }
+    if (eff.thirst) {
+      GameState.thirst = Math.min(100, GameState.thirst + eff.thirst);
+      text += `水分 +${eff.thirst}。\n`;
+    }
+    if (eff.hp) {
+      GameState.hp = Math.min(GameState.maxHp, GameState.hp + eff.hp);
+      text += `HP +${eff.hp}。\n`;
+    }
+    if (eff.morale) {
+      GameState.morale = Math.min(100, GameState.morale + eff.morale);
+      text += `士气 +${eff.morale}。\n`;
+    }
+    if (eff.food) {
+      GameState.food += eff.food;
+      text += `食物 +${eff.food}。\n`;
+    }
+
+    if (recipe.type === 'weapon') {
+      const quality = (function () {
+        const r = Math.random();
+        if (r < 0.6) return 'white';
+        if (r < 0.9) return 'green';
+        return 'blue';
+      })();
+      const w = createWeapon(recipe.weaponBase, recipe.weaponAtk, recipe.weaponDur, quality, 'melee');
+      addWeaponToInventory(w);
+      text += `你成功制作了一件武器：${describeWeapon(w)}\n`;
+    }
+
+    applyStarvationDamage();
+    q('craftDetail').textContent = text;
+
+    if (GameState.hp <= 0) {
+      GameState.hp = 0;
+      enterGameOver(text + '\n\n你再也撑不下去了。');
+      return;
+    }
+
+    GameState.logExtra = text;
+    enterBase(false);
+  }
+  window.craftRecipe = craftRecipe;
+
+  function backFromCraft() {
+    enterBase(false);
+  }
+  window.backFromCraft = backFromCraft;
+
+  // -----------------------
+  // 启动
+  // -----------------------
+  restart();
+</script>
+</body>
+</html>
